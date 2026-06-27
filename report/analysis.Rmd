@@ -1,0 +1,234 @@
+---
+title: "DNA Methylation Analysis - GSE279988"
+author: "TONME NZALI SYLLA ROMINE"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    self_contained: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  fig.align = "center",
+  fig.width = 8,
+  fig.height = 6
+)
+
+figure_files <- c(
+  histogram = "../Results/01_histogram.png",
+  pca = "../Results/02_PCA.png",
+  heatmap = "../Results/03_heatmap.png",
+  volcano = "../Results/04_volcano.png",
+  cpg_summary = "../Results/05_CpG_summary.png",
+  boxplot_groups = "../Results/06_boxplot_groups.png",
+  density = "../Results/07_density.png"
+)
+```
+
+# Introduction
+
+Malaria is a serious infectious disease that can affect pregnancy. It can lead to fetal growth restriction (FGR), which is associated with poor birth outcomes and long-term health problems. Recent studies suggest that DNA methylation plays an important role in how malaria affects fetal development.
+
+DNA methylation is a chemical modification that occurs in DNA. It does not change the DNA sequence itself, but it affects how genes behave. In simple terms, DNA methylation can turn genes on or off by controlling their activity, acting like a switch that regulates gene expression.
+
+In DNA, there are specific positions called CpG sites. A CpG site is a location where a cytosine (C) is followed by a guanine (G). These sites are important because methylation mainly occurs there. Each CpG site has a methylation value between 0 and 1:
+
+- A value close to 0 indicates low methylation.
+- A value close to 1 indicates high methylation.
+
+The aim of this analysis is:
+
+- To explore global methylation patterns.
+- To compare samples.
+- To identify CpG sites that show significant differences.
+
+# 1. Setup and Data Loading
+
+The dataset contains methylation values between 0 and 1 for a large number of CpG sites across different samples. Before starting the analysis, it is important to verify that the data is clean and reliable.
+
+We first check:
+
+- The dimensions of the dataset.
+- The range of values.
+- The presence of missing data.
+
+The values range from close to 0 up to almost 1, which is expected for methylation data. No missing values are found, which confirms that the dataset is complete and suitable for further analysis.
+
+# 2. Data Distribution - Quality Control
+
+To understand the data, we first look at the distribution of methylation values using a histogram and a density plot.
+
+The histogram shows how frequently each methylation value appears. The density plot is a smoother version of this distribution. Both plots reveal a bimodal distribution, meaning there are two main peaks:
+
+- One peak at low values, around 0.
+- Another peak at high values, around 1.
+
+This pattern is typical in DNA methylation studies and reflects the fact that CpG sites are often either unmethylated or fully methylated. This confirms that the dataset follows expected biological behavior.
+
+## 2.1 Histogram
+
+```{r histogram, out.width="85%"}
+knitr::include_graphics(figure_files["histogram"])
+```
+
+## 2.2 Density Plot
+
+```{r density-plot, out.width="85%"}
+knitr::include_graphics(figure_files["density"])
+```
+
+# 3. PCA - Global Sample Structure
+
+Principal Component Analysis (PCA) is used to compare samples based on their methylation profiles. Each point in the PCA plot represents one sample. If two points are close together, the samples are similar. If they are far apart, they are different.
+
+In this case, the samples are spread across the plot without forming clear clusters. This indicates that:
+
+- There is variability between samples.
+- There is no strong separation into distinct groups.
+
+This suggests that the overall methylation patterns are relatively similar across samples.
+
+```{r pca, out.width="85%"}
+knitr::include_graphics(figure_files["pca"])
+```
+
+# 4. Heatmap - Local Methylation Patterns
+
+The heatmap visualizes methylation levels for the most variable CpG sites. Each row represents a CpG site, and each column represents a sample. Colors indicate methylation levels:
+
+- Blue = low methylation.
+- Red = high methylation.
+
+The heatmap shows that:
+
+- There is variability in methylation across CpG sites.
+- Some samples share similar patterns.
+- Small clusters of samples can be observed.
+
+However, there is no strong separation between groups. This result is consistent with the PCA analysis.
+
+```{r heatmap, out.width="85%"}
+knitr::include_graphics(figure_files["heatmap"])
+```
+
+# 5. Differential Methylation Analysis
+
+Differential methylation analysis was performed using the `limma` method, which is suitable for continuous methylation data.
+
+In this analysis:
+
+- Samples were divided into two groups.
+- A statistical model was used to identify differences.
+
+Since no real biological group labels were available, artificial groups were created. Therefore, this analysis is exploratory.
+
+The results show that some CpG sites are more methylated in one group, while others are less methylated. This allows us to identify CpG sites with potential differences.
+
+# 6. Volcano Plot - Identification of Significant CpGs
+
+The volcano plot combines:
+
+- The size of the methylation difference, shown as log fold change.
+- The statistical significance.
+
+Each point represents one CpG site. We apply a threshold:
+
+- `-log10(p-value) > 4` indicates strong statistical significance.
+
+In the plot, most CpG sites are near the center and a small number of CpG sites are above the threshold. These points are highlighted in red. This shows that only a limited number of CpG sites are strongly different and most CpGs do not show major changes.
+
+```{r volcano, out.width="85%"}
+knitr::include_graphics(figure_files["volcano"])
+```
+
+# 7. Summary of Significant CpGs
+
+The bar plot summarizes the number of significant and non-significant CpG sites.
+
+The results show:
+
+- A very large number of non-significant CpGs.
+- A small number of significant CpGs.
+
+This is expected in genomic data, where only a small proportion of sites show meaningful differences.
+
+```{r cpg-summary, out.width="85%"}
+knitr::include_graphics(figure_files["cpg_summary"])
+```
+
+# 8. Group Comparison - Methylation Distribution
+
+The boxplot compares the overall methylation distributions between the two groups.
+
+The results show that:
+
+- Both groups have very similar distributions.
+- The median values are almost identical.
+- The variability is similar.
+
+This indicates that there is no strong global difference between groups and that methylation differences are not widespread. This is consistent with the PCA and volcano plot results.
+
+```{r boxplot-groups, out.width="85%"}
+knitr::include_graphics(figure_files["boxplot_groups"])
+```
+
+# 9. Overall Interpretation
+
+Combining all results:
+
+- The dataset shows the expected methylation distribution.
+- Samples are globally similar.
+- Some CpG sites show variability.
+- Significant changes are limited to a small number of CpGs.
+
+This suggests that methylation differences exist but are not widespread.
+
+# 10. Comparison with the Scientific Study
+
+In the study, the authors found:
+
+- Specific CpG sites that were differentially methylated.
+- Limited but significant changes in methylation.
+- Differences between groups, but not across all CpGs.
+
+Our results are consistent with these findings:
+
+- Only a subset of CpG sites is significantly different.
+- Most CpGs do not show major changes.
+
+However, a key difference is that:
+
+- The study used real biological groups.
+- Our analysis used artificial groups.
+
+This explains why we do not observe strong clustering in PCA.
+
+# 11. Limitations
+
+This analysis has some limitations:
+
+- Group labels were artificially defined.
+- CpG sites are not directly linked to genes.
+- Functional interpretation is limited.
+
+Because of this, the results should be considered exploratory.
+
+# 12. Conclusion
+
+This analysis provides an overview of DNA methylation patterns in the dataset.
+
+The main findings are:
+
+- Methylation follows a typical bimodal distribution.
+- Samples show no strong clustering.
+- Variability exists at specific CpG sites.
+- Only a small number of CpGs are significantly different.
+- Global methylation levels are similar between groups.
+
+These results suggest that DNA methylation changes are present but limited to specific sites, rather than affecting the entire genome. This is consistent with the scientific study, which also showed that methylation changes are localized to specific CpG sites.
+
+Overall, this analysis highlights the importance of DNA methylation in understanding biological processes, while showing that significant changes often occur in specific regions rather than globally.
